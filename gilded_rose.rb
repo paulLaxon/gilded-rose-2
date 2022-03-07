@@ -14,36 +14,45 @@ class GildedRose
 
       item.sell_in -= 1
 
-      if item.name != 'Aged Brie' && item.name != 'Backstage passes to a TAFKAL80ETC concert'
-        if item.quality.positive?
-          item.quality = if item.name == 'Conjured Mana Cake'
-                           item.quality - 2
-                         else
-                           item.quality - 1
-                         end
-        end
-      elsif item.quality < 50
-        item.quality += 1
-        if item.name == 'Backstage passes to a TAFKAL80ETC concert'
-          if item.sell_in <= 11
-            item.quality += 1
-          end
-          if item.sell_in <= 6
-            item.quality += 1
-          end
-        end
-      end
-      next unless item.sell_in.negative?
+      update(item)
 
-      item.quality += 1 if item.name == 'Aged Brie' && item.quality < 50
-      if item.name == 'Backstage passes to a TAFKAL80ETC concert'
-        item.quality = 0
-      elsif item.quality.positive? && item.name == 'Conjured Mana Cake'
-        item.quality -= 2
-      else
-        item.quality -= 1
-      end
+      item.quality = 0 if item.quality.negative?
+      item.quality = 50 if item.quality > 50
     end
+  end
+
+  def update(item)
+    case item.name
+    when 'Aged Brie'
+      aged_brie(item)
+    when 'Backstage passes to a TAFKAL80ETC concert'
+      backstage_passes(item)
+    when 'Conjured Mana Cake'
+      conjured(item)
+    else
+      normal(item)
+    end
+  end
+
+  def aged_brie(item)
+    item.quality += 1
+  end
+
+  def backstage_passes(item)
+    item.quality += 1
+    item.quality += 1 if item.sell_in <= 11
+    item.quality += 1 if item.sell_in <= 6
+    item.quality = 0 if item.sell_in.negative?
+  end
+
+  def conjured(item)
+    item.quality -= 2
+    item.quality -= 2 if item.sell_in.negative?
+  end
+
+  def normal(item)
+    item.quality -= 1
+    item.quality -= 1 if item.sell_in.negative?
   end
 end
 
